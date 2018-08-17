@@ -1,0 +1,32 @@
+---
+- name: Create certs directory if it doesn't exist
+  file:
+    path: /etc/ssl/certs/
+    state: directory
+
+
+- name: Create certs directory if it doesn't exist
+  file:
+    path: /etc/ssl/private/
+    state: directory
+
+
+
+- name: Generate CSR and private key
+  shell: bash -c "openssl req -nodes -newkey rsa:2048 -keyout /etc/ssl/private/{{ common_name }}.key -out /etc/ssl/certs/{{ common_name }}.csr -subj \"/C={{ country }}/ST={{ state }}/L={{ locale }}/O={{ organisation }}/OU={{ oraganizationalunit }}/CN={{ common_name }}\""
+  register: csr_generate
+
+- name: Get private key
+  command: "cat /etc/ssl/private/{{ common_name }}.key"
+  register: get_key
+
+- name: Get CSR
+  command: "cat /etc/ssl/certs/{{ common_name }}.csr"
+  register: get_csr
+
+- debug:
+    msg: 
+    - "Private Key for {{ common_name }}"
+    - "{{ get_key.stdout_lines }}"
+    - "CSR for {{ common_name }}"
+    - "{{ get_csr.stdout_lines }}"
